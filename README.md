@@ -11,6 +11,7 @@ Investigate implementation of multiple features that would be required of a prod
 - Receive http requests
 - Receive work from a queue
 - Process work on a cron schedule?
+- Persistent storage of some kind (relational or otherwise)
 - Environmentaly configurable
 - Produce structured log output
 - Dockerized
