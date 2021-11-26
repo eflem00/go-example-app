@@ -12,15 +12,18 @@ Investigate implementation of multiple features that would be required of a prod
 
 ## Requirements
 
-- Receive http requests
-- Receive work from a queue
-- Persistent storage of some kind (relational or otherwise)
-- Environmentaly configurable
-- Produce structured log output
-- Dockerized
-- Dependancy injection
-- Unit and integration test configuration
-- CI/CD configuration
+- [x] Receive http requests 
+- [x] Receive work from a queue
+- [ ] Persistent storage of some kind (relational or otherwise)
+- [ ] Environmentaly configurable
+- [ ] Produce structured log output
+- [ ] Dockerized
+- [ ] Dependancy injection
+- [ ] Unit and integration test configuration
+- [ ] CI/CD configuration
+
+## Diagram
+![plot](diagram.jpg)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
