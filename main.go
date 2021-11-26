@@ -2,7 +2,8 @@ package main
 
 import (
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 
 	"github.com/eflem00/go-example-app/controllers"
 	"github.com/eflem00/go-example-app/controllers/http"
@@ -27,6 +28,16 @@ func configLogger() {
 	}
 }
 
+func awaitSigterm() {
+	log.Info().Msg("awaiting sigterm...")
+
+	cancelChan := make(chan os.Signal, 1)
+	signal.Notify(cancelChan, syscall.SIGTERM, syscall.SIGINT)
+	sig := <-cancelChan
+
+	log.Info().Msgf("caught signal %v", sig)
+}
+
 func main() {
 
 	loadEnv()
@@ -37,20 +48,17 @@ func main() {
 
 	// start a slice of blocking functions in concurrent go routines
 	// functions implement IController
-	waitGroup := new(sync.WaitGroup)
 	contrs := []controllers.IController{
 		http.HttpController{},
 		queue.QueueController{},
 	}
 
-	for i, contr := range contrs {
-		waitGroup.Add(i)
-
-		go func(contr controllers.IController) {
-			defer waitGroup.Done()
-			contr.Start()
-		}(contr)
+	for _, contr := range contrs {
+		go contr.Start()
 	}
 
-	waitGroup.Wait()
+	// blocking call to await sigterm
+	awaitSigterm()
+
+	// TODO: Shutdown gracefully below
 }
