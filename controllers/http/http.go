@@ -9,8 +9,15 @@ import (
 type HttpController struct{}
 
 func (controller HttpController) Start() {
+	log.Info().Msg("starting http...")
+
 	for {
-		log.Info().Msg("Recieving http...")
+		log.Info().Msg("recieving http...")
 		time.Sleep(time.Second)
+		panic("ahh!!!")
 	}
+}
+
+func (controller HttpController) Exit() {
+	log.Info().Msg("caught panic in http controller.")
 }

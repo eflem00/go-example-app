@@ -10,8 +10,15 @@ type QueueController struct {
 }
 
 func (controller QueueController) Start() {
+	log.Info().Msg("Starting queue...")
+
 	for {
 		log.Info().Msg("Polling queue...")
 		time.Sleep(time.Second)
+		panic("ahh!!!")
 	}
+}
+
+func (controller QueueController) Exit() {
+	log.Info().Msg("caught panic in queue controller.")
 }

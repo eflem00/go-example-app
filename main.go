@@ -35,7 +35,7 @@ func awaitSigterm() {
 	signal.Notify(cancelChan, syscall.SIGTERM, syscall.SIGINT)
 	sig := <-cancelChan
 
-	log.Info().Msgf("caught signal %v", sig)
+	log.Info().Msgf("caught sigterm %v", sig)
 }
 
 func main() {
@@ -54,10 +54,13 @@ func main() {
 	}
 
 	for _, contr := range contrs {
-		go contr.Start()
+		go func(contr controllers.IController) {
+			defer contr.Exit() // start is intended to be a blocking call. If Exit() is called, we have caught a panic.
+			contr.Start()
+		}(contr)
 	}
 
-	// blocking call to await sigterm
+	// blocking call in main routine to await sigterm
 	awaitSigterm()
 
 	// TODO: Shutdown gracefully below
