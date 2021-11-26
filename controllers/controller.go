@@ -1,6 +1,6 @@
 package controllers
 
 type IController interface {
-	Start()
+	Start() error
 	Exit()
 }

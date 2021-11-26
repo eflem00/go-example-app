@@ -55,8 +55,12 @@ func main() {
 
 	for _, contr := range contrs {
 		go func(contr controllers.IController) {
-			defer contr.Exit() // start is intended to be a blocking call. If Exit() is called, we have caught a panic.
-			contr.Start()
+			// start is intended to be a blocking call
+			// if Exit() is called, we have caught a panic
+			// if start returns, one of our controllers is no longer active and thus we should force a panic
+			defer contr.Exit()
+			err := contr.Start()
+			panic(err)
 		}(contr)
 	}
 
