@@ -9,15 +9,16 @@ import (
 type HttpController struct{}
 
 func (controller HttpController) Start() {
-	log.Info().Msg("starting http...")
+	log.Info().Msg("starting http")
 
+	// TODO: Meaningful http implementation
 	for {
-		log.Info().Msg("recieving http...")
+		log.Info().Msg("recieving http")
 		time.Sleep(time.Second)
 		panic("ahh!!!")
 	}
 }
 
 func (controller HttpController) Exit() {
-	log.Info().Msg("caught panic in http controller.")
+	log.Info().Msg("caught panic in http controller")
 }

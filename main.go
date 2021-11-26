@@ -29,7 +29,7 @@ func configLogger() {
 }
 
 func awaitSigterm() {
-	log.Info().Msg("awaiting sigterm...")
+	log.Info().Msg("awaiting sigterm")
 
 	cancelChan := make(chan os.Signal, 1)
 	signal.Notify(cancelChan, syscall.SIGTERM, syscall.SIGINT)
@@ -44,7 +44,7 @@ func main() {
 
 	configLogger()
 
-	log.Info().Msg("starting app...")
+	log.Info().Msg("starting app")
 
 	// start a slice of blocking functions in concurrent go routines
 	// functions implement IController
