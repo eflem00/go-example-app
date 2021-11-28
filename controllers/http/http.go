@@ -17,7 +17,7 @@ func health(w http.ResponseWriter, r *http.Request) {
 
 func process(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Second) // simulate some expensive work here
-	fmt.Fprint(w, "OK")
+	fmt.Fprint(w, "Done processing.")
 }
 
 func (controller HttpController) Start() error {

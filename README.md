@@ -1,6 +1,6 @@
 # go-example-app
 
-An example production grade go microservice
+An example multi-purpose go microservice
 
 ## Motivation
 
@@ -14,10 +14,10 @@ Investigate implementation of multiple features that would be required of a prod
 
 - [x] Receive http requests 
 - [x] Receive work from a queue
+- [x] Dockerized
 - [ ] Persistent storage of some kind (relational or otherwise)
 - [ ] Environmentaly configurable
 - [ ] Produce structured log output
-- [ ] Dockerized
 - [ ] Dependancy injection
 - [ ] Unit and integration test configuration
 - [ ] CI/CD configuration
