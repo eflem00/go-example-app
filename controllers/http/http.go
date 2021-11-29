@@ -39,7 +39,7 @@ func (controller HttpController) Start() error {
 	r := chi.NewRouter()
 	r.Get("/", health)
 	r.Get("/health", health)
-	r.Post("/getresults/{id}", getResultsById)
+	r.Get("/getresults/{id}", getResultsById)
 
 	// this is essentially a blocking call
 	err := http.ListenAndServe(port, r)
