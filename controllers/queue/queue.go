@@ -1,24 +1,40 @@
 package queue
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/eflem00/go-example-app/usecases"
 	"github.com/rs/zerolog/log"
 )
 
 type QueueController struct {
 }
 
-// do some fake work. we would do something to process the message here.
-func process(_ *sqs.Message) error {
-	time.Sleep(time.Second)
-	return nil
+type MsgBody struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func process(msg *sqs.Message) error {
+	body := MsgBody{}
+	err := json.Unmarshal([]byte(*msg.Body), &body)
+
+	if err != nil {
+		return err
+	}
+
+	ctx := context.TODO() // TODO: Derive better context per msg
+
+	log.Debug().Msg(fmt.Sprintf("%+v", body))
+
+	return usecases.WriteResult(ctx, body.Key, body.Value)
 }
 
 func (controller QueueController) Start() error {
@@ -74,7 +90,7 @@ func (controller QueueController) Start() error {
 			go func(msg *sqs.Message) {
 				defer wg.Done()
 
-				log.Info().Msg(fmt.Sprintf("processing message: %v %v", *msg.MessageId, *msg.Body))
+				log.Debug().Msg(fmt.Sprintf("processing message: %v %v", *msg.MessageId, *msg.Body))
 
 				err := process(msg)
 
@@ -95,7 +111,7 @@ func (controller QueueController) Start() error {
 					return
 				}
 
-				log.Info().Msg(fmt.Sprintf("processed message: %v", *msg.MessageId))
+				log.Debug().Msg(fmt.Sprintf("processed message: %v", *msg.MessageId))
 			}(message)
 
 		}

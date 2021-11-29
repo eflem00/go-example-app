@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
+	"github.com/eflem00/go-example-app/usecases"
+	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 )
 
@@ -15,9 +16,17 @@ func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "OK")
 }
 
-func process(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Second) // simulate some expensive work here
-	fmt.Fprint(w, "Done processing.")
+func getResultsById(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	val, err := usecases.GetResultById(r.Context(), id)
+
+	if err != nil {
+		http.Error(w, "Error reading key", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprint(w, val)
 }
 
 func (controller HttpController) Start() error {
@@ -27,11 +36,13 @@ func (controller HttpController) Start() error {
 
 	log.Info().Msg(fmt.Sprintf("listening on %v", port))
 
-	http.HandleFunc("/", health)
-	http.HandleFunc("/health", health)
-	http.HandleFunc("/process", process)
+	r := chi.NewRouter()
+	r.Get("/", health)
+	r.Get("/health", health)
+	r.Post("/getresults/{id}", getResultsById)
 
-	err := http.ListenAndServe(port, nil)
+	// this is essentially a blocking call
+	err := http.ListenAndServe(port, r)
 
 	log.Error().Err(err).Msg("error in http controller")
 

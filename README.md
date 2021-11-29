@@ -14,8 +14,9 @@ Investigate implementation of multiple features that would be required of a prod
 
 - [x] Receive http requests 
 - [x] Receive work from a queue
+- [ ] Persistent storage of some kind
+- [X] Caching mechanism
 - [x] Dockerized
-- [ ] Persistent storage of some kind (relational or otherwise)
 - [ ] Environmentaly configurable
 - [ ] Produce structured log output
 - [ ] Dependancy injection
