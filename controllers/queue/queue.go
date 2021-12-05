@@ -15,6 +15,13 @@ import (
 )
 
 type QueueController struct {
+	resultUsecase *usecases.ResultUsecase
+}
+
+func NewQueueController(resultUsecase *usecases.ResultUsecase) *QueueController {
+	return &QueueController{
+		resultUsecase,
+	}
 }
 
 type MsgBody struct {
@@ -22,7 +29,7 @@ type MsgBody struct {
 	Value string `json:"value"`
 }
 
-func process(msg *sqs.Message) error {
+func (controller *QueueController) process(msg *sqs.Message) error {
 	body := MsgBody{}
 	err := json.Unmarshal([]byte(*msg.Body), &body)
 
@@ -34,10 +41,10 @@ func process(msg *sqs.Message) error {
 
 	log.Debug().Msg(fmt.Sprintf("%+v", body))
 
-	return usecases.WriteResult(ctx, body.Key, body.Value)
+	return controller.resultUsecase.WriteResult(ctx, body.Key, body.Value)
 }
 
-func (controller QueueController) Start() error {
+func (controller *QueueController) Start() error {
 	log.Info().Msg("Starting queue controller")
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -92,7 +99,7 @@ func (controller QueueController) Start() error {
 
 				log.Debug().Msg(fmt.Sprintf("processing message: %v %v", *msg.MessageId, *msg.Body))
 
-				err := process(msg)
+				err := controller.process(msg)
 
 				// if we fail to process the message we should not delete.
 				// after a certain amount of reads without a delete the message will be automatically moved to a dead-letter queue
@@ -120,6 +127,6 @@ func (controller QueueController) Start() error {
 	}
 }
 
-func (controller QueueController) Exit() {
+func (controller *QueueController) Exit() {
 	log.Error().Msg("detected exit in queue controller")
 }

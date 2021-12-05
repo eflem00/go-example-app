@@ -10,16 +10,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type HttpController struct{}
+type HttpController struct {
+	resultUsecase *usecases.ResultUsecase
+}
 
-func health(w http.ResponseWriter, r *http.Request) {
+func NewHttpController(resultUsecase *usecases.ResultUsecase) *HttpController {
+	return &HttpController{
+		resultUsecase,
+	}
+}
+
+func (controller *HttpController) health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "OK")
 }
 
-func getResultsById(w http.ResponseWriter, r *http.Request) {
+func (controller *HttpController) getResultsById(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	val, err := usecases.GetResultById(r.Context(), id)
+	val, err := controller.resultUsecase.GetResultById(r.Context(), id)
 
 	if err != nil {
 		http.Error(w, "Error reading key", http.StatusBadRequest)
@@ -29,7 +37,7 @@ func getResultsById(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, val)
 }
 
-func (controller HttpController) Start() error {
+func (controller *HttpController) Start() error {
 	log.Info().Msg("Starting http controller")
 
 	port := os.Getenv("PORT")
@@ -37,9 +45,9 @@ func (controller HttpController) Start() error {
 	log.Info().Msg(fmt.Sprintf("listening on %v", port))
 
 	r := chi.NewRouter()
-	r.Get("/", health)
-	r.Get("/health", health)
-	r.Get("/getresults/{id}", getResultsById)
+	r.Get("/", controller.health)
+	r.Get("/health", controller.health)
+	r.Get("/getresults/{id}", controller.getResultsById)
 
 	// this is essentially a blocking call
 	err := http.ListenAndServe(port, r)
@@ -49,6 +57,6 @@ func (controller HttpController) Start() error {
 	return err
 }
 
-func (controller HttpController) Exit() {
+func (controller *HttpController) Exit() {
 	log.Error().Msg("detected exit in http controller")
 }
