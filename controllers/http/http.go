@@ -1,62 +1,48 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 
-	"github.com/eflem00/go-example-app/usecases"
+	"github.com/eflem00/go-example-app/common"
 	"github.com/go-chi/chi/v5"
-	"github.com/rs/zerolog/log"
 )
 
 type HttpController struct {
-	resultUsecase *usecases.ResultUsecase
+	settings      *common.Settings
+	logger        *common.Logger
+	resultHandler *ResultHandler
+	healthHandler *HealthHandler
 }
 
-func NewHttpController(resultUsecase *usecases.ResultUsecase) *HttpController {
+func NewHttpController(settings *common.Settings, logger *common.Logger, resultHandler *ResultHandler, healthHandler *HealthHandler) *HttpController {
 	return &HttpController{
-		resultUsecase,
+		settings,
+		logger,
+		resultHandler,
+		healthHandler,
 	}
-}
-
-func (controller *HttpController) health(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "OK")
-}
-
-func (controller *HttpController) getResultsById(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-
-	val, err := controller.resultUsecase.GetResultById(r.Context(), id)
-
-	if err != nil {
-		http.Error(w, "Error reading key", http.StatusBadRequest)
-		return
-	}
-
-	fmt.Fprint(w, val)
 }
 
 func (controller *HttpController) Start() error {
-	log.Info().Msg("Starting http controller")
-
-	port := os.Getenv("PORT")
-
-	log.Info().Msg(fmt.Sprintf("listening on %v", port))
+	controller.logger.Info("Starting http controller")
 
 	r := chi.NewRouter()
-	r.Get("/", controller.health)
-	r.Get("/health", controller.health)
-	r.Get("/getresults/{id}", controller.getResultsById)
+	r.Get("/", controller.healthHandler.Health)
+	r.Get("/health", controller.healthHandler.Health)
+	r.Get("/results/{id}", controller.resultHandler.GetResultById)
+
+	port := controller.settings.Port
+
+	controller.logger.Infof("listening on %v", port)
 
 	// this is essentially a blocking call
 	err := http.ListenAndServe(port, r)
 
-	log.Error().Err(err).Msg("error in http controller")
+	controller.logger.Err(err, "error in http controller")
 
 	return err
 }
 
 func (controller *HttpController) Exit() {
-	log.Error().Msg("detected exit in http controller")
+	controller.logger.Error("detected exit in http controller")
 }

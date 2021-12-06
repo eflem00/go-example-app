@@ -5,18 +5,20 @@ import (
 	"errors"
 	"time"
 
+	"github.com/eflem00/go-example-app/common"
 	"github.com/eflem00/go-example-app/gateways/cache"
 	"github.com/eflem00/go-example-app/gateways/db"
-	"github.com/rs/zerolog/log"
 )
 
 type ResultUsecase struct {
+	logger           *common.Logger
 	cache            *cache.Cache
 	resultRepository *db.ResultRepository
 }
 
-func NewResultUseCase(cache *cache.Cache, resultRepository *db.ResultRepository) *ResultUsecase {
+func NewResultUseCase(logger *common.Logger, cache *cache.Cache, resultRepository *db.ResultRepository) *ResultUsecase {
 	return &ResultUsecase{
+		logger,
 		cache,
 		resultRepository,
 	}
@@ -29,7 +31,7 @@ func (uc *ResultUsecase) GetResultById(ctx context.Context, key string) (string,
 
 	// should check the type of error for redis.Nil here but we'll keep it simple and treat this as a cache miss
 	if err != nil {
-		log.Debug().Msgf("Cache miss for key %v", key)
+		uc.logger.Debugf("Cache miss for key %v", key)
 
 		val, err = uc.resultRepository.GetResultById(key)
 
@@ -41,7 +43,7 @@ func (uc *ResultUsecase) GetResultById(ctx context.Context, key string) (string,
 
 		return val, nil
 	} else { // cache hit, use the value and touch the key
-		log.Debug().Msgf("Cache hit for key %v", key)
+		uc.logger.Debugf("Cache hit for key %v", key)
 
 		uc.cache.Touch(ctx, key)
 

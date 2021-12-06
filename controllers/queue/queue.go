@@ -3,23 +3,25 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"os"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/eflem00/go-example-app/common"
 	"github.com/eflem00/go-example-app/usecases"
-	"github.com/rs/zerolog/log"
 )
 
 type QueueController struct {
+	settings      *common.Settings
+	logger        *common.Logger
 	resultUsecase *usecases.ResultUsecase
 }
 
-func NewQueueController(resultUsecase *usecases.ResultUsecase) *QueueController {
+func NewQueueController(settings *common.Settings, logger *common.Logger, resultUsecase *usecases.ResultUsecase) *QueueController {
 	return &QueueController{
+		settings,
+		logger,
 		resultUsecase,
 	}
 }
@@ -39,13 +41,11 @@ func (controller *QueueController) process(msg *sqs.Message) error {
 
 	ctx := context.TODO() // TODO: Derive better context per msg
 
-	log.Debug().Msg(fmt.Sprintf("%+v", body))
-
 	return controller.resultUsecase.WriteResult(ctx, body.Key, body.Value)
 }
 
 func (controller *QueueController) Start() error {
-	log.Info().Msg("Starting queue controller")
+	controller.logger.Info("Starting queue controller")
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -53,18 +53,18 @@ func (controller *QueueController) Start() error {
 
 	svc := sqs.New(sess)
 
-	queueName := os.Getenv("QUEUE_NAME")
+	queueName := controller.settings.QueueName
 
 	result, err := svc.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: &queueName,
 	})
 
 	if err != nil {
-		log.Err(err).Msg(fmt.Sprintf("Error fetching queue url for name %v", queueName))
+		controller.logger.Errf(err, "Error fetching queue url for name %v", queueName)
 		return err
 	}
 
-	log.Info().Msg(fmt.Sprintf("listening to %v", *result.QueueUrl))
+	controller.logger.Infof("listening to %v", *result.QueueUrl)
 
 	// poll for messages indefinitely
 	for {
@@ -81,7 +81,7 @@ func (controller *QueueController) Start() error {
 		})
 
 		if err != nil {
-			log.Err(err).Msg("error receiving message")
+			controller.logger.Err(err, "error receiving message")
 			continue
 		}
 
@@ -97,14 +97,14 @@ func (controller *QueueController) Start() error {
 			go func(msg *sqs.Message) {
 				defer wg.Done()
 
-				log.Debug().Msg(fmt.Sprintf("processing message: %v %v", *msg.MessageId, *msg.Body))
+				controller.logger.Debugf("starting message: %v %v", *msg.MessageId, *msg.Body)
 
 				err := controller.process(msg)
 
 				// if we fail to process the message we should not delete.
 				// after a certain amount of reads without a delete the message will be automatically moved to a dead-letter queue
 				if err != nil {
-					log.Err(err).Msg(fmt.Sprintf("error processing message: %v", *msg.MessageId))
+					controller.logger.Errf(err, "error processing message: %v", *msg.MessageId)
 					return
 				}
 
@@ -114,11 +114,11 @@ func (controller *QueueController) Start() error {
 				})
 
 				if err != nil {
-					log.Err(err).Msg(fmt.Sprintf("error deleting message: %v", *msg.MessageId))
+					controller.logger.Errf(err, "error deleting message: %v", *msg.MessageId)
 					return
 				}
 
-				log.Debug().Msg(fmt.Sprintf("processed message: %v", *msg.MessageId))
+				controller.logger.Debugf("finished message: %v", *msg.MessageId)
 			}(message)
 
 		}
@@ -128,5 +128,5 @@ func (controller *QueueController) Start() error {
 }
 
 func (controller *QueueController) Exit() {
-	log.Error().Msg("detected exit in queue controller")
+	controller.logger.Error("detected exit in queue controller")
 }
