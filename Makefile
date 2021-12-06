@@ -12,3 +12,6 @@ docker-run:
 
 docker-pg:
 	docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+
+docker-redis:
+	docker run -d -p 6379:6379 redis

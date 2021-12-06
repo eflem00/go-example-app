@@ -14,12 +14,12 @@ Investigate implementation of multiple features that would be required of a prod
 
 - [x] Receive http requests 
 - [x] Receive work from a queue
-- [ ] Persistent storage of some kind
+- [x] Persistent storage of some kind
 - [X] Caching mechanism
 - [x] Dockerized
-- [ ] Environmentaly configurable
-- [ ] Produce structured log output
-- [ ] Dependancy injection
+- [x] Environmentaly configurable
+- [x] Produce structured log output
+- [x] Dependancy injection
 - [ ] Unit and integration test configuration
 - [ ] CI/CD configuration
 
