@@ -35,7 +35,6 @@ func (controller *HttpController) Start() error {
 
 	controller.logger.Infof("listening on %v", port)
 
-	// this is essentially a blocking call
 	err := http.ListenAndServe(port, r)
 
 	controller.logger.Err(err, "error in http controller")

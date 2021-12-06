@@ -7,10 +7,11 @@ import (
 )
 
 type Settings struct {
-	Env       string
-	Port      string
-	QueueName string
-	RedisPort string
+	Env                string
+	Port               string
+	QueueName          string
+	RedisPort          string
+	PgConnectionString string
 }
 
 func NewSettings() *Settings {
@@ -20,10 +21,11 @@ func NewSettings() *Settings {
 	}
 
 	return &Settings{
-		Env:       os.Getenv("ENV"),
-		Port:      os.Getenv("PORT"),
-		QueueName: os.Getenv("QUEUE_NAME"),
-		RedisPort: os.Getenv("REDIS_PORT"),
+		Env:                os.Getenv("ENV"),
+		Port:               os.Getenv("PORT"),
+		QueueName:          os.Getenv("QUEUE_NAME"),
+		RedisPort:          os.Getenv("REDIS_PORT"),
+		PgConnectionString: os.Getenv("PG_CONNECTION_STRING"),
 	}
 }
 

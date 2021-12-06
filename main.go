@@ -30,6 +30,7 @@ func main() {
 	container.Provide(common.NewSettings)
 	container.Provide(common.NewLogger)
 	container.Provide(cache.NewCache)
+	container.Provide(db.NewDb)
 	container.Provide(db.NewResultRepository)
 	container.Provide(usecases.NewResultUseCase)
 	container.Provide(http.NewHealthHandler)

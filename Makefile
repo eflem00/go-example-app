@@ -8,4 +8,7 @@ docker-build:
 	docker build --tag go-example-app .
 
 docker-run:
-	docker run -d -p 8081:8081 go-example-app
+	docker run -d -p 8080:8080 go-example-app
+
+docker-pg:
+	docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres

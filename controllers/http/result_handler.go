@@ -21,7 +21,7 @@ func NewResultHandler(resultUsecase *usecases.ResultUsecase) *ResultHandler {
 func (handler *ResultHandler) GetResultById(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	val, err := handler.resultUsecase.GetResultById(r.Context(), id)
+	val, err := handler.resultUsecase.GetResultValueById(r.Context(), id)
 
 	if err != nil {
 		http.Error(w, "Error reading key", http.StatusBadRequest)
