@@ -15,3 +15,10 @@ docker-pg:
 
 docker-redis:
 	docker run -d -p 6379:6379 redis
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
+
